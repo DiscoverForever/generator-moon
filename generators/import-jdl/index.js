@@ -7,7 +7,10 @@ module.exports = class extends Generator {
     super(args, opts);
 
     this.option('babel'); // This method adds support for a `--babel` flag
-    this.argument('jdlFiles', { type: Array, required: true });
+    this.argument('jdlFiles', {
+      type: Array,
+      required: true
+    });
     this.options.jdlFiles = this.options.jdlFiles.map(jdlFile =>
       this.destinationPath(jdlFile)
     );
@@ -17,10 +20,17 @@ module.exports = class extends Generator {
   async prompting() {}
 
   writing() {
-    this.fs.copyTpl(this.templatePath(), this.destinationPath());
+    this.jdlObjects.entities.forEach(entity => {
+      this.log(entity.name);
+      this.fs.copyTpl(
+        this.templatePath('entity.ts'),
+        this.destinationPath(`${entity.name}.ts`),
+        {
+          entity
+        }
+      );
+    });
   }
 
-  install() {
-    // This.installDependencies();
-  }
+  install() {}
 };
