@@ -1,7 +1,6 @@
 'use strict';
 const Generator = require('yeoman-generator');
 const jhiCore = require('jhipster-core');
-
 module.exports = class extends Generator {
   constructor(args, opts) {
     super(args, opts);
@@ -15,6 +14,7 @@ module.exports = class extends Generator {
       this.destinationPath(jdlFile)
     );
     this.jdlObjects = jhiCore.parseFromFiles(this.options.jdlFiles);
+    this.log(JSON.stringify(this.jdlObjects));
   }
 
   async prompting() {}
@@ -23,10 +23,34 @@ module.exports = class extends Generator {
     this.jdlObjects.entities.forEach(entity => {
       this.log(entity.name);
       this.fs.copyTpl(
-        this.templatePath('entity.ts'),
+        this.templatePath('entity.ts.ejs'),
         this.destinationPath(`${entity.name}.ts`),
         {
           entity
+        }
+      );
+      this.fs.copyTpl(
+        this.templatePath('hook.ex.js.ejs'),
+        this.destinationPath(`${entity.name}.hook.ex.js`),
+        {
+          entity
+        }
+      );
+      this.fs.copyTpl(
+        this.templatePath('hook.js.ejs'),
+        this.destinationPath(`${entity.name}.hook.js`),
+        {
+          entity
+        }
+      );
+      this.fs.copyTpl(
+        this.templatePath('entity.model.ts.ejs'),
+        this.destinationPath(`${entity.name}.model.ts`),
+        {
+          entity,
+          relationships: this.jdlObjects.relationships,
+          enums: this.jdlObjects.enums,
+          dto: this.jdlObjects.dto
         }
       );
     });

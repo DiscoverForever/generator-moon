@@ -1,0 +1,47 @@
+import { BaseEntity } from './../../shared';
+<%_ 
+const types = {
+  TypeScript: {
+    'Boolean': 'boolean', 
+    'Integer': 'number', 
+    'Float': 'number', 
+    'Double': 'number',
+    'BigDecimal': 'number', 
+    'LocalDate': 'Date', 
+    'Instant': 'any', 
+    'ZonedDateTime': 'Date', 
+    'String': 'string',
+    'UUID': 'string',
+    'ImageBlob': 'any'
+  }
+};
+const fields = entity.body;
+const ownenums = enums.filter(enumItem => fields.some(field => field.type === enumItem.name));
+_%>
+
+<% ownenums.forEach(enumItem => { %>
+export const enum <%- enumItem.name %> {
+<%_ enumItem.values.forEach((value, index) => { _%>
+  <%- value %><%- index === enumItem.values.length - 1 ? '' : ',' %>
+<% }) _%>
+}
+<% }); %>
+
+/**
+ * <%= entity.javadoc %>
+ * @export
+ * @class <%= entity.name %> 
+ * @implements {BaseEntity}
+ */
+export class <%= entity.name %> implements BaseEntity {
+    constructor(
+        <%_ entity.body.forEach(field => { _%>
+        public <%- field.name %><%- field.validations.some(validation => validation.key === 'required') ? '' : '?' %>: <%- types.TypeScript[field.type] ? types.TypeScript[field.type] : field.type %>,
+        <%_ }); _%>
+      
+    ) {
+        <%_ entity.body.filter(field => field.type === 'Boolean').forEach(field => { _%>
+        this.<%- field.name %> = false;
+        <%_ }); _%>
+    }
+}
