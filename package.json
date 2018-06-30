@@ -37,6 +37,7 @@
   "dependencies": {
     "chalk": "^2.1.0",
     "jhipster-core": "^3.0.2",
+    "xml2js": "^0.4.19",
     "yeoman-generator": "^2.0.1",
     "yosay": "^2.0.1"
   },

@@ -24,28 +24,21 @@ module.exports = class extends Generator {
       this.log(entity.name);
       this.fs.copyTpl(
         this.templatePath('entity.ts.ejs'),
-        this.destinationPath(`${entity.name}.ts`),
-        {
-          entity
-        }
-      );
-      this.fs.copyTpl(
-        this.templatePath('hook.ex.js.ejs'),
-        this.destinationPath(`${entity.name}.hook.ex.js`),
+        this.destinationPath(`entities/${entity.name}/${entity.name}.ts`),
         {
           entity
         }
       );
       this.fs.copyTpl(
         this.templatePath('hook.js.ejs'),
-        this.destinationPath(`${entity.name}.hook.js`),
+        this.destinationPath(`entities/${entity.name}/${entity.name}.hook.js`),
         {
           entity
         }
       );
       this.fs.copyTpl(
         this.templatePath('entity.model.ts.ejs'),
-        this.destinationPath(`${entity.name}.model.ts`),
+        this.destinationPath(`entities/${entity.name}/${entity.name}.model.ts`),
         {
           entity,
           relationships: this.jdlObjects.relationships,
