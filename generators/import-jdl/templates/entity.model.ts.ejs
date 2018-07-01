@@ -38,12 +38,21 @@ export class <%= entity.name %> extends AV.Object {
     constructor() {
         super();
     }
-
+    
 <%_ entity.body.forEach(field => { _%>
+
+    /**
+     * <%= field.javadoc %>
+     * @memberof <%= entity.name %>
+     */
     set <%- field.name %>(<%- field.name %>: <%- types.TypeScript[field.type] ? types.TypeScript[field.type] : field.type %>) {
       this.set('<%- field.name %>', <%- field.name %>);
     }
 
+    /**
+     * <%= field.javadoc %>
+     * @memberof <%= entity.name %>
+     */
     get <%- field.name %>() {
       return this.get('<%- field.name %>');
     }

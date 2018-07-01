@@ -1,7 +1,6 @@
 'use strict';
 const Generator = require('yeoman-generator');
 const xml2js = require('xml2js');
-const path = require('path');
 
 module.exports = class extends Generator {
   constructor(args, opts) {
@@ -21,9 +20,7 @@ module.exports = class extends Generator {
           if (err) {
             throw err;
           } else {
-            obj = Object.assign(result, {
-              entityName: path.basename(statemachineFile, '.xml')
-            });
+            obj = result;
           }
         }
       );
@@ -35,15 +32,29 @@ module.exports = class extends Generator {
   async prompting() {}
 
   writing() {
-    this.statemachineObjects.forEach(statemachine =>
+    this.statemachineObjects.forEach(statemachine => {
       this.fs.copyTpl(
-        this.templatePath('cloud.js.ejs'),
-        this.destinationPath(`${statemachine.entityName}-statemachine.js`),
+        this.templatePath('entity-statemachine.ts.ejs'),
+        this.destinationPath(
+          `${this.config.get('appname')}-express-ts/entities/${
+            statemachine.scxml.$.entityname
+          }/${statemachine.scxml.$.entityname}-${
+            statemachine.scxml.$.enumname
+          }-statemachine.ts`
+        ),
         {
           statemachine
         }
-      )
-    );
+      );
+      this.fs.append(
+        this.destinationPath(
+          `${this.config.get('appname')}-express-ts/entities/statemachine-import.ts`
+        ),
+        `import './${statemachine.scxml.$.entityname}/${
+          statemachine.scxml.$.entityname
+        }-${statemachine.scxml.$.enumname}-statemachine';`
+      );
+    });
   }
 
   install() {}
