@@ -1,7 +1,5 @@
 'use strict';
 const Generator = require('yeoman-generator');
-const chalk = require('chalk');
-const yosay = require('yosay');
 
 module.exports = class extends Generator {
   // The name `constructor` is important here
@@ -14,18 +12,7 @@ module.exports = class extends Generator {
   }
 
   async prompting() {
-    // Have Yeoman greet the user.
-    this.log(
-      yosay(`Welcome to the super-duper ${chalk.red('generator-moon')} generator!`)
-    );
-
     const prompts = [
-      {
-        type: 'confirm',
-        name: 'someAnswer',
-        message: 'Would you like to enable this option?',
-        default: true
-      },
       {
         type: 'input',
         name: 'appname',
@@ -34,20 +21,26 @@ module.exports = class extends Generator {
       }
     ];
 
-    return this.prompt(prompts).then(props => {
-      // To access props later use this.props.someAnswer;
-      this.props = props;
-    });
+    this.props = await this.prompt(prompts);
+    this.config.set('appname', this.props.appname);
+    this.config.save();
   }
 
   writing() {
     this.fs.copy(
-      this.templatePath('dummyfile.txt'),
-      this.destinationPath('dummyfile.txt')
+      this.templatePath('express-ts'),
+      this.destinationPath(`${this.props.appname}-express-ts`),
+      {
+        globOptions: {
+          dot: true
+        }
+      }
     );
   }
 
   install() {
-    this.installDependencies();
+    this.yarnInstall(null, null, {
+      cwd: this.destinationPath(`${this.props.appname}-express-ts`)
+    });
   }
 };

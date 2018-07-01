@@ -20,25 +20,34 @@ module.exports = class extends Generator {
   async prompting() {}
 
   writing() {
+    this.fs.copyTpl(
+      this.templatePath('cloud-import.ts.ejs'),
+      this.destinationPath(
+        `${this.config.get('appname')}-express-ts/entities/cloud-import.ts`
+      ),
+      {
+        entities: this.jdlObjects.entities
+      }
+    );
     this.jdlObjects.entities.forEach(entity => {
-      this.log(entity.name);
       this.fs.copyTpl(
-        this.templatePath('entity.ts.ejs'),
-        this.destinationPath(`entities/${entity.name}/${entity.name}.ts`),
-        {
-          entity
-        }
-      );
-      this.fs.copyTpl(
-        this.templatePath('hook.js.ejs'),
-        this.destinationPath(`entities/${entity.name}/${entity.name}.hook.js`),
+        this.templatePath('hook.ts.ejs'),
+        this.destinationPath(
+          `${this.config.get('appname')}-express-ts/entities/${entity.name}/${
+            entity.name
+          }.hook.ts`
+        ),
         {
           entity
         }
       );
       this.fs.copyTpl(
         this.templatePath('entity.model.ts.ejs'),
-        this.destinationPath(`entities/${entity.name}/${entity.name}.model.ts`),
+        this.destinationPath(
+          `${this.config.get('appname')}-express-ts/entities/${entity.name}/${
+            entity.name
+          }.model.ts`
+        ),
         {
           entity,
           relationships: this.jdlObjects.relationships,
