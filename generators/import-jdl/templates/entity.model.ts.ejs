@@ -1,4 +1,4 @@
-import { BaseEntity } from './../../shared';
+import * as AV from 'leanengine';
 <%_ 
 const types = {
   TypeScript: {
@@ -31,17 +31,24 @@ export const enum <%- enumItem.name %> {
  * <%= entity.javadoc %>
  * @export
  * @class <%= entity.name %> 
- * @implements {BaseEntity}
+ * @extends {AV.Object}
  */
-export class <%= entity.name %> implements BaseEntity {
-    constructor(
-        <%_ entity.body.forEach(field => { _%>
-        public <%- field.name %><%- field.validations.some(validation => validation.key === 'required') ? '' : '?' %>: <%- types.TypeScript[field.type] ? types.TypeScript[field.type] : field.type %>,
-        <%_ }); _%>
-      
-    ) {
-        <%_ entity.body.filter(field => field.type === 'Boolean').forEach(field => { _%>
-        this.<%- field.name %> = false;
-        <%_ }); _%>
+export class <%= entity.name %> extends AV.Object {
+    
+    constructor() {
+        super();
     }
+
+<%_ entity.body.forEach(field => { _%>
+    set <%- field.name %>(<%- field.name %>: <%- types.TypeScript[field.type] ? types.TypeScript[field.type] : field.type %>) {
+      this.set('<%- field.name %>', <%- field.name %>);
+    }
+
+    get <%- field.name %>() {
+      return this.get('<%- field.name %>');
+    }
+<%_ }); _%>
+
+    
 }
+AV.Object.register(<%= entity.name %>);
