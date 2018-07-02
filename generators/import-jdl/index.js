@@ -55,6 +55,13 @@ module.exports = class extends Generator {
           dto: this.jdlObjects.dto
         }
       );
+      this.fs.copyTpl(
+        this.templatePath('role.ts.ejs'),
+        this.destinationPath(`${this.config.get('appname')}-express-ts/role.ts`),
+        {
+          entities: this.jdlObjects.entities
+        }
+      );
     });
   }
 
