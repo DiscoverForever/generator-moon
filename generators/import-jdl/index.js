@@ -1,6 +1,7 @@
 'use strict';
 const Generator = require('yeoman-generator');
 const jhiCore = require('jhipster-core');
+const _ = require('loadsh');
 module.exports = class extends Generator {
   constructor(args, opts) {
     super(args, opts);
@@ -26,40 +27,44 @@ module.exports = class extends Generator {
         `${this.config.get('appname')}-express-ts/entities/cloud-import.ts`
       ),
       {
-        entities: this.jdlObjects.entities
+        entities: this.jdlObjects.entities,
+        _
       }
     );
     this.jdlObjects.entities.forEach(entity => {
       this.fs.copyTpl(
         this.templatePath('hook.ts.ejs'),
         this.destinationPath(
-          `${this.config.get('appname')}-express-ts/entities/${entity.name}/${
+          `${this.config.get('appname')}-express-ts/entities/${_.kebabCase(
             entity.name
-          }.hook.ts`
+          )}/${_.kebabCase(entity.name)}.hook.ts`
         ),
         {
-          entity
+          entity,
+          _
         }
       );
       this.fs.copyTpl(
         this.templatePath('entity.model.ts.ejs'),
         this.destinationPath(
-          `${this.config.get('appname')}-express-ts/entities/${entity.name}/${
+          `${this.config.get('appname')}-express-ts/entities/${_.kebabCase(
             entity.name
-          }.model.ts`
+          )}/${_.kebabCase(entity.name)}.model.ts`
         ),
         {
           entity,
           relationships: this.jdlObjects.relationships,
           enums: this.jdlObjects.enums,
-          dto: this.jdlObjects.dto
+          dto: this.jdlObjects.dto,
+          _
         }
       );
       this.fs.copyTpl(
         this.templatePath('role.ts.ejs'),
         this.destinationPath(`${this.config.get('appname')}-express-ts/role.ts`),
         {
-          entities: this.jdlObjects.entities
+          entities: this.jdlObjects.entities,
+          _
         }
       );
     });

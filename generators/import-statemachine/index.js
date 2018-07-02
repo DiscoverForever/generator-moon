@@ -1,6 +1,7 @@
 'use strict';
 const Generator = require('yeoman-generator');
 const xml2js = require('xml2js');
+const _ = require('loadsh');
 
 module.exports = class extends Generator {
   constructor(args, opts) {
@@ -43,7 +44,8 @@ module.exports = class extends Generator {
           }-statemachine.ts`
         ),
         {
-          statemachine
+          statemachine,
+          _
         }
       );
       this.fs.append(
