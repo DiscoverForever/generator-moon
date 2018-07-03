@@ -2,6 +2,7 @@
 const Generator = require('yeoman-generator');
 const jhiCore = require('jhipster-core');
 const _ = require('loadsh');
+const merge = require('deepmerge');
 module.exports = class extends Generator {
   constructor(args, opts) {
     super(args, opts);
@@ -14,7 +15,14 @@ module.exports = class extends Generator {
     this.options.jdlFiles = this.options.jdlFiles.map(jdlFile =>
       this.destinationPath(jdlFile)
     );
-    this.jdlObjects = jhiCore.parseFromFiles(this.options.jdlFiles);
+    const newJdlObjects = jhiCore.parseFromFiles(this.options.jdlFiles);
+    const oldJdlObjects = this.config.get('jdlObjects');
+    if (oldJdlObjects) {
+      this.jdlObjects = merge(oldJdlObjects, newJdlObjects);
+    } else {
+      this.jdlObjects = newJdlObjects;
+    }
+    this.config.set('jdlObjects', this.jdlObjects);
     this.log(JSON.stringify(this.jdlObjects));
   }
 

@@ -2,7 +2,7 @@
 const Generator = require('yeoman-generator');
 const xml2js = require('xml2js');
 const _ = require('loadsh');
-
+const merge = require('deepmerge');
 module.exports = class extends Generator {
   constructor(args, opts) {
     super(args, opts);
@@ -13,7 +13,8 @@ module.exports = class extends Generator {
       required: true
     });
     this.log(this.options.statemachineFiles);
-    this.statemachineObjects = this.options.statemachineFiles.map(statemachineFile => {
+    const oldStatemachines = this.config.get('statemachines');
+    const newStatemachines = this.options.statemachineFiles.map(statemachineFile => {
       let obj;
       xml2js.parseString(
         this.fs.read(this.destinationPath(statemachineFile)),
@@ -27,36 +28,42 @@ module.exports = class extends Generator {
       );
       return obj;
     });
-    this.log(JSON.stringify(this.statemachineObjects));
+    if (oldStatemachines) {
+      this.statemachines = merge(oldStatemachines, newStatemachines);
+    } else {
+      this.statemachines = newStatemachines;
+    }
+    this.config.set('statemachines', this.statemachines);
+    this.log(JSON.stringify(this.statemachines));
   }
 
   async prompting() {}
 
   writing() {
-    this.statemachineObjects.forEach(statemachine => {
+    this.statemachines.forEach(statemachine => {
       this.fs.copyTpl(
-        this.templatePath('entity-statemachine.ts.ejs'),
+        this.templatePath('foo.statemachine.ts.ejs'),
         this.destinationPath(
           `${this.config.get('appname')}-express-ts/entities/${
             statemachine.scxml.$.entityname
-          }/${statemachine.scxml.$.entityname}-${
-            statemachine.scxml.$.enumname
-          }-statemachine.ts`
+          }/${_.kebabCase(statemachine.scxml.$.enumname)}.statemachine.ts`
         ),
         {
           statemachine,
           _
         }
       );
-      this.fs.append(
-        this.destinationPath(
-          `${this.config.get('appname')}-express-ts/entities/statemachine-import.ts`
-        ),
-        `import './${statemachine.scxml.$.entityname}/${
-          statemachine.scxml.$.entityname
-        }-${statemachine.scxml.$.enumname}-statemachine';`
-      );
     });
+    this.fs.copyTpl(
+      this.templatePath('statemachine-import.ts.ejs'),
+      this.destinationPath(
+        `${this.config.get('appname')}-express-ts/entities/statemachine-import.ts`
+      ),
+      {
+        _,
+        statemachines: this.statemachines
+      }
+    );
   }
 
   install() {}
