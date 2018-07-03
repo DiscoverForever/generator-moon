@@ -1,0 +1,25 @@
+import { createRole, createAdminUser, addSubRole, bindRoleForUser } from './utils';
+
+/**
+ * 初始化
+ * 创建超级管理员用户
+ * 创建超级管理员角色
+ * 为每个实体创建一个以实体名命名的角色
+ * @export
+ * @param {*} username
+ * @param {*} password
+ * @param {*} email
+ */
+export async function init(username: string, password: string, email: string) {
+  const adminUser = await createAdminUser(username, password, email);
+  const adminRole = await createRole('admin', adminUser);
+  await bindRoleForUser(adminUser, adminRole);
+  console.info('超级管理员:', adminUser.getUsername());
+  <%_ entities.forEach(entity => { _%>
+  <% const entityName = _.camelCase(entity.name) %>
+  const <%= entityName %>Role = await createRole('<%= entity.name %>', adminUser);
+  await addSubRole(<%= entityName %>Role, adminRole)
+  <%= entityName %>Role.getRoles().add(adminRole);
+
+  <%_ }); _%>
+}

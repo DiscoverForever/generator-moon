@@ -1,0 +1,18 @@
+import * as AV from 'leanengine';
+import { <%= statemachine.scxml.$.enumname %> } from '../<%= statemachine.scxml.$.entityname %>/<%= statemachine.scxml.$.entityname %>.model';
+
+<%_ statemachine.scxml.state.forEach(state => { _%>
+  <% state.transition && state.transition.forEach(transition => { %>
+/** 
+ * <%= transition.$.eventdoc %>
+ */
+AV.Cloud.define('<%= transition.$.event %>', function(request):any {
+  if (request.currentUser === undefined) {
+    throw new AV.Cloud.Error('Access Deny');
+  }
+  const entity = new AV.Object('<%= statemachine.scxml.$.entityname %>');
+  entity.set('<%= statemachine.scxml.$.fieldname ? statemachine.scxml.$.fieldname : statemachine.scxml.$.enumname %>', <%= statemachine.scxml.$.enumname %>.<%= transition.$.target %>);
+  return entity.save();
+});
+  <%_ }) _%>
+<%_ }); _%>

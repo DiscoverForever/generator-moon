@@ -1,0 +1,46 @@
+import * as AV from 'leanengine';
+<%_ statemachine.scxml.state.forEach(state => { _%>
+  <% state.transition && state.transition.forEach(transition => { %>
+/** 
+ * <%= transition.$.eventdoc %>
+ */
+AV.Cloud.define('<%= transition.$.event %>', async function() {
+  const entity = new AV.Object('<%= statemachine.entityName %>');
+  entity.set('state', '<%= transition.$.target %>');
+  return await entity.save();
+});
+  <%_ }) _%>
+<%_ }); _%>
+
+function setACL(acl, currentUser) {
+  let entity = request.object;
+  let acl = new AV.ACL();
+  const ACL = <%-JSON.stringify(ACL).replace(/^"(.*)"$/g, '$1')%>;
+  for (var key in ACL) {
+    if (key === '*') {
+      acl.setPublicReadAccess(ACL[key][read]);
+      acl.setPublicWriteAccess(ACL[key][write]);
+    }
+    if (key.startsWith('role')) {
+      const roleName = key.split(':')[1];
+      const roleQuery = new AV.Query(AV.Role);
+      roleQuery.equalTo('name', roleName);
+      const role = roleQuery.first();
+      acl.setRoleReadAccess(role, ACL[key][read])
+      acl.setRoleWriteAccess(role, ACL[key][write]);
+    }
+    acl.setReadAccess(currentUser, true);
+    acl.setWriteAccess(currentUser, true);
+  }
+  entity.setACL(acl);
+}
+
+function createRole(roleName, roleAcl) {
+  roleAcl ? roleAcl : roleAcl = new AV.ACL();
+  roleAcl.setPublicReadAccess(false);
+  roleAcl.setPublicWriteAccess(false);
+  // roleAcl.setWriteAccess(admin, true);
+
+  const role = new AV.Role(roleName, acl);
+  return role.save();
+}

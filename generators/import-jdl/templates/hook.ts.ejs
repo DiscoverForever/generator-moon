@@ -1,0 +1,32 @@
+import * as AV from 'leanengine';
+/** 保存前 */
+AV.Cloud.beforeSave('<%=entity.name%>', async function(request) {
+  if (!request.currentUser) {
+    throw new Error('Before save object you must login');
+  }
+  const entity = request.object;
+  entity.set('createBy', request.currentUser);
+  return await entity.save();
+} as any);
+/** 保存后 */
+AV.Cloud.afterSave('<%=entity.name%>', async function(request) {
+  
+} as any);
+/** 更新前 */
+AV.Cloud.beforeUpdate('<%=entity.name%>', async function(request) {
+  
+} as any);
+/** 更新后 */
+AV.Cloud.afterUpdate('<%=entity.name%>', async function(request) {
+  
+} as any);
+/** 删除前 */
+AV.Cloud.beforeDelete('<%=entity.name%>', async function(request) {
+  
+} as any);
+/** 删除后 */
+AV.Cloud.afterDelete('<%=entity.name%>', async function(request) {
+  
+} as any);
+
+  

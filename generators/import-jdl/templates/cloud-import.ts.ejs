@@ -1,0 +1,6 @@
+/** Dont remove this file 'import from' will inject there */
+<%_ entities.forEach(entity => {_%>
+import './<%= _.kebabCase(entity.name) %>/<%= _.kebabCase(entity.name) %>.hook';
+<%_ }); _%>
+
+export default {}
