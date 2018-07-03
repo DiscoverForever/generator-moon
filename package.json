@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "chalk": "^2.1.0",
+    "deepmerge": "^2.1.1",
     "jhipster-core": "^3.0.2",
     "loadsh": "^1.0.1",
     "querystring": "^0.2.0",
