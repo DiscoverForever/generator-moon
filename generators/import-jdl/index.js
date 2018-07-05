@@ -18,7 +18,9 @@ module.exports = class extends Generator {
     const newJdlObjects = jhiCore.parseFromFiles(this.options.jdlFiles);
     const oldJdlObjects = this.config.get('jdlObjects');
     if (oldJdlObjects) {
-      this.jdlObjects = merge(oldJdlObjects, newJdlObjects);
+      this.jdlObjects = merge(oldJdlObjects, newJdlObjects, {
+        arrayMerge: (destinationArray, sourceArray) => sourceArray
+      });
     } else {
       this.jdlObjects = newJdlObjects;
     }
@@ -32,7 +34,7 @@ module.exports = class extends Generator {
     this.fs.copyTpl(
       this.templatePath('cloud-import.ts.ejs'),
       this.destinationPath(
-        `${this.config.get('appname')}-express-ts/entities/cloud-import.ts`
+        `${this.config.get('serverProjectName')}/src/entities/cloud-import.ts`
       ),
       {
         entities: this.jdlObjects.entities,
@@ -43,7 +45,7 @@ module.exports = class extends Generator {
       this.fs.copyTpl(
         this.templatePath('hook.ts.ejs'),
         this.destinationPath(
-          `${this.config.get('appname')}-express-ts/entities/${_.kebabCase(
+          `${this.config.get('serverProjectName')}/src/entities/${_.kebabCase(
             entity.name
           )}/${_.kebabCase(entity.name)}.hook.ts`
         ),
@@ -55,7 +57,7 @@ module.exports = class extends Generator {
       this.fs.copyTpl(
         this.templatePath('entity.model.ts.ejs'),
         this.destinationPath(
-          `${this.config.get('appname')}-express-ts/entities/${_.kebabCase(
+          `${this.config.get('serverProjectName')}/src/entities/${_.kebabCase(
             entity.name
           )}/${_.kebabCase(entity.name)}.model.ts`
         ),
@@ -69,7 +71,7 @@ module.exports = class extends Generator {
       );
       this.fs.copyTpl(
         this.templatePath('role.ts.ejs'),
-        this.destinationPath(`${this.config.get('appname')}-express-ts/role.ts`),
+        this.destinationPath(`${this.config.get('serverProjectName')}/src/util/role.ts`),
         {
           entities: this.jdlObjects.entities,
           _

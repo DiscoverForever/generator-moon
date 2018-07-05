@@ -29,7 +29,9 @@ module.exports = class extends Generator {
       return obj;
     });
     if (oldStatemachines) {
-      this.statemachines = merge(oldStatemachines, newStatemachines);
+      this.statemachines = merge(oldStatemachines, newStatemachines, {
+        arrayMerge: (destinationArray, sourceArray) => sourceArray
+      });
     } else {
       this.statemachines = newStatemachines;
     }
@@ -44,9 +46,9 @@ module.exports = class extends Generator {
       this.fs.copyTpl(
         this.templatePath('foo.statemachine.ts.ejs'),
         this.destinationPath(
-          `${this.config.get('appname')}-express-ts/entities/${
+          `${this.config.get('serverProjectName')}/src/entities/${_.kebabCase(
             statemachine.scxml.$.entityname
-          }/${_.kebabCase(statemachine.scxml.$.enumname)}.statemachine.ts`
+          )}/${_.kebabCase(statemachine.scxml.$.enumname)}.statemachine.ts`
         ),
         {
           statemachine,
@@ -57,7 +59,7 @@ module.exports = class extends Generator {
     this.fs.copyTpl(
       this.templatePath('statemachine-import.ts.ejs'),
       this.destinationPath(
-        `${this.config.get('appname')}-express-ts/entities/statemachine-import.ts`
+        `${this.config.get('serverProjectName')}/src/entities/statemachine-import.ts`
       ),
       {
         _,

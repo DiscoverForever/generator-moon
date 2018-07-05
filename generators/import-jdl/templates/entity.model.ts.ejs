@@ -18,7 +18,6 @@ const types = {
 const fields = entity.body;
 const ownenums = enums.filter(enumItem => fields.some(field => field.type === enumItem.name));
 _%>
-
 <% ownenums.forEach(enumItem => { %>
 export const enum <%- enumItem.name %> {
 <%_ enumItem.values.forEach((value, index) => { _%>
@@ -30,15 +29,14 @@ export const enum <%- enumItem.name %> {
 /**
  * <%= entity.javadoc %>
  * @export
- * @class <%= entity.name %> 
+ * @class <%= entity.name %>
  * @extends {AV.Object}
  */
 export class <%= entity.name %> extends AV.Object {
-    
+
     constructor() {
         super();
     }
-    
 <%_ entity.body.forEach(field => { _%>
 
     /**
@@ -58,6 +56,5 @@ export class <%= entity.name %> extends AV.Object {
     }
 <%_ }); _%>
 
-    
 }
 AV.Object.register(<%= entity.name %>);

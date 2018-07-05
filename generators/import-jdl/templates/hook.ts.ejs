@@ -1,32 +1,30 @@
 import * as AV from 'leanengine';
 /** 保存前 */
-AV.Cloud.beforeSave('<%=entity.name%>', async function(request) {
+AV.Cloud.beforeSave('<%=entity.name%>', function(request): any {
   if (!request.currentUser) {
     throw new Error('Before save object you must login');
   }
   const entity = request.object;
   entity.set('createBy', request.currentUser);
-  return await entity.save();
-} as any);
+  return entity.save();
+});
 /** 保存后 */
-AV.Cloud.afterSave('<%=entity.name%>', async function(request) {
-  
-} as any);
-/** 更新前 */
-AV.Cloud.beforeUpdate('<%=entity.name%>', async function(request) {
-  
-} as any);
-/** 更新后 */
-AV.Cloud.afterUpdate('<%=entity.name%>', async function(request) {
-  
-} as any);
-/** 删除前 */
-AV.Cloud.beforeDelete('<%=entity.name%>', async function(request) {
-  
-} as any);
-/** 删除后 */
-AV.Cloud.afterDelete('<%=entity.name%>', async function(request) {
-  
-} as any);
+AV.Cloud.afterSave('<%=entity.name%>', function(request): any {
 
-  
+});
+/** 更新前 */
+AV.Cloud.beforeUpdate('<%=entity.name%>', function(request): any {
+
+});
+/** 更新后 */
+AV.Cloud.afterUpdate('<%=entity.name%>', function(request): any {
+
+});
+/** 删除前 */
+AV.Cloud.beforeDelete('<%=entity.name%>', function(request): any {
+
+});
+/** 删除后 */
+AV.Cloud.afterDelete('<%=entity.name%>', function(request): any {
+
+});

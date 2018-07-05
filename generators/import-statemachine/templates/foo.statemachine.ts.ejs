@@ -1,12 +1,9 @@
 import * as AV from 'leanengine';
-import { <%= statemachine.scxml.$.enumname %> } from '../<%= statemachine.scxml.$.entityname %>/<%= statemachine.scxml.$.entityname %>.model';
-
+import { <%= statemachine.scxml.$.enumname %> } from './<%=  _.kebabCase(statemachine.scxml.$.entityname) %>.model';
 <%_ statemachine.scxml.state.forEach(state => { _%>
-  <% state.transition && state.transition.forEach(transition => { %>
-/** 
- * <%= transition.$.eventdoc %>
- */
-AV.Cloud.define('<%= transition.$.event %>', function(request):any {
+  <%_ state.transition && state.transition.forEach(transition => { _%>
+/** <%= transition.$.eventdoc %> */
+AV.Cloud.define('<%= transition.$.event %>', function(request): any {
   if (request.currentUser === undefined) {
     throw new AV.Cloud.Error('Access Deny');
   }
