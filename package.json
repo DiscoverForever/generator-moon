@@ -38,8 +38,6 @@
     "chalk": "^2.1.0",
     "deepmerge": "^2.1.1",
     "jhipster-core": "^3.0.2",
-    "leancloud-storage": "^3.7.3",
-    "leanengine": "^3.2.0",
     "loadsh": "^1.0.1",
     "querystring": "^0.2.0",
     "xml2js": "^0.4.19",
