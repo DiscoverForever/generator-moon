@@ -8,7 +8,7 @@ AV.Cloud.beforeSave('<%=entity.name%>', function(request): any {
   }
   const entity = request.object;
   entity.set('createBy', request.currentUser);
-  <%_ if (entity.params && entity.params.ACL) {_%>
+  <%_ if (entity.params && entity.params.ACL) { _%>
   entity.setACL(getAclByObject(request.currentUser, <%- entity.params.ACL.replace(/"/g, `'`) %>));
   <%_ } _%>
   
