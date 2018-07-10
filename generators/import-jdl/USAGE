@@ -1,0 +1,19 @@
+async function setACL(entity: AV.Object, currentUser: AV.User) {
+  const acl = new AV.ACL();
+<%_ const ACL = JSON.parse(entity.params.ACL) _%>
+<%_ for (var key in ACL) { _%>
+  <%_ if (key === '*') { _%>
+  acl.setPublicReadAccess(<%= ACL['*']['read'] %>);
+  acl.setPublicWriteAccess(<%= ACL['*']['write'] %>);
+  <%_ } else if (key === 'currentUser') { _%>
+  acl.setReadAccess(currentUser, <%= ACL['currentUser']['read'] %>);
+  acl.setWriteAccess(currentUser, <%= ACL['currentUser']['write'] %>);
+  <%_ } else if (key.startsWith('role:')) { _%>
+
+  const <%= key.split('role:')[1] %>Role = await getRole('<%= key.split('role:')[1] %>');
+  acl.setRoleReadAccess(<%= key.split('role:')[1] %>Role, <%= ACL[key]['read'] %>);
+  acl.setRoleWriteAccess(<%= key.split('role:')[1] %>Role, <%= ACL[key]['write'] %>);
+  <%_ } _%>
+<%_ } _%>
+  entity.setACL(acl);
+}

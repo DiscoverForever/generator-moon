@@ -19,6 +19,7 @@
     "yeoman-generator"
   ],
   "devDependencies": {
+    "ejs-lint": "^0.3.0",
     "eslint": "^4.19.1",
     "eslint-config-prettier": "^2.9.0",
     "eslint-config-xo": "^0.20.1",
@@ -39,7 +40,6 @@
     "deepmerge": "^2.1.1",
     "jhipster-core": "^3.0.2",
     "loadsh": "^1.0.1",
-    "querystring": "^0.2.0",
     "xml2js": "^0.4.19",
     "yeoman-generator": "^2.0.1",
     "yosay": "^2.0.1"
@@ -51,6 +51,8 @@
     "prepublishOnly": "nsp check",
     "pretest": "eslint .",
     "precommit": "lint-staged",
+    "ejslint": "ejslint",
+    "ejs-lint": "npm run test",
     "test": "jest"
   },
   "lint-staged": {

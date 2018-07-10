@@ -1,7 +1,1 @@
-{
-  <%_ let length = 0 _%>
-  <%_ for (let key in config) { _%>
-    <%_ length++ _%>
-    "<%= key %>": "<%= config[key] %>"<%= Object.keys(config).length === length ? '' : ',' %>
-  <%_ } _%>
-}
+<%- JSON.stringify(config) %>

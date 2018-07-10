@@ -1,4 +1,6 @@
 import * as AV from 'leanengine';
+import { getAclByObject } from '../../util/acl';
+
 /** 保存前 */
 AV.Cloud.beforeSave('<%=entity.name%>', function(request): any {
   if (!request.currentUser) {
@@ -6,7 +8,10 @@ AV.Cloud.beforeSave('<%=entity.name%>', function(request): any {
   }
   const entity = request.object;
   entity.set('createBy', request.currentUser);
-  return entity.save();
+  <%_ if (entity.params && entity.params.ACL) {_%>
+  entity.setACL(getAclByObject(request.currentUser, <%- entity.params.ACL.replace(/"/g, `'`) %>));
+  <%_ } _%>
+  
 });
 /** 保存后 */
 AV.Cloud.afterSave('<%=entity.name%>', function(request): any {

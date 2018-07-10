@@ -1,5 +1,7 @@
 import * as AV from 'leanengine';
 <%_ 
+const fields = entity.body;
+const ownenums = enums.filter(enumItem => fields.some(field => field.type === enumItem.name));
 const types = {
   TypeScript: {
     'Boolean': 'boolean', 
@@ -15,8 +17,16 @@ const types = {
     'ImageBlob': 'any'
   }
 };
-const fields = entity.body;
-const ownenums = enums.filter(enumItem => fields.some(field => field.type === enumItem.name));
+const customTypes = (str) => {
+  let type = {
+    name: 'any',
+    tableName: null
+  };
+  if ((/^Pointer_/).test(str)) type = { name: 'AV.Object', tableName: str.replace(/^Pointer_(.*)$/g, '$1') };
+  if (ownenums.some(enumItem => enumItem.name === str)) type = { name: str };
+  return type;
+};
+
 _%>
 <% ownenums.forEach(enumItem => { %>
 export const enum <%- enumItem.name %> {
@@ -43,7 +53,7 @@ export class <%= entity.name %> extends AV.Object {
      * <%= field.javadoc %>
      * @memberof <%= entity.name %>
      */
-    set <%- field.name %>(<%- field.name %>: <%- types.TypeScript[field.type] ? types.TypeScript[field.type] : field.type %>) {
+    set <%- field.name %>(<%- field.name %>: <%- types.TypeScript[field.type] ? types.TypeScript[field.type] : customTypes(field.type)['name'] %>) {
       this.set('<%- field.name %>', <%- field.name %>);
     }
 

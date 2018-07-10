@@ -6,7 +6,7 @@ import lusca from 'lusca';
 import path from 'path';
 import expressValidator from 'express-validator';
 import AV from 'leanengine';
-import route from './controllers/index';
+import route from './controllers';
 import('./entities/cloud-import');
 import('./entities/statemachine-import');
 
