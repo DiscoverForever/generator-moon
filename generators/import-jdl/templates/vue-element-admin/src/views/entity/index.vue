@@ -10,9 +10,30 @@
     <el-table class="table" ref="multipleTable" :stripe="true" :border="true" :data="tableData" height="650" tooltip-effect="dark" highlight-current-row @selection-change="handleSelectionChange" @sort-change="onSortChange">
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column width="250" prop="objectId" label="objectId"></el-table-column>
-      <%_ entity.body.forEach(prop => { _%>
-      <el-table-column width="120" prop="<%=prop.type.startsWith('Pointer_') ? `${prop.name}.objectId` : prop.name%>" label="<%=prop.javadoc ? prop.javadoc : prop.name%>" <%-prop.type==='Date' ? ':formatter="formatterDate"': ''%> sortable="custom"></el-table-column>
-      <%_ })_%>
+    <%_ entity.body.forEach(prop => { _%>
+      <%_ if (prop.type.startsWith('Pointer_')) { _%>
+      <el-table-column width="120" prop="<%= prop.name %>.objectId" label="<%=prop.javadoc ? prop.javadoc : prop.name%>" sortable="custom">
+        <template slot-scope="scope">
+          <router-link v-if="scope.row.<%= prop.name %>" :to="`/<%= _.kebabCase(prop.type.replace(/^Pointer_/, '')) %>/<%= _.kebabCase(prop.type.replace(/^Pointer_/, '')) %>-edit/${scope.row.<%= prop.name %>.objectId}`" :style="{color:'#409EFF', textDecoration:'underline'}">{{scope.row.<%= prop.name %>.objectId}}</router-link>
+        </template>
+      </el-table-column>
+      <%_ } else if (prop.type.includes('Blob')) { _%>
+      <el-table-column width="120" prop="<%= prop.name %>.name" label="<%=prop.javadoc ? prop.javadoc : prop.name%>" sortable="custom">
+        <template slot-scope="scope">
+          <a :href="scope.row.<%= prop.name %>.url" :style="{color:'#409EFF', textDecoration:'underline'}">{{ scope.row.<%= prop.name %>.name}}</a>
+        </template>
+      </el-table-column>
+      <%_ } else if (prop.type === 'ArrayString') { _%>
+      <el-table-column width="120" prop="<%= prop.name %>" label="<%=prop.javadoc ? prop.javadoc : prop.name%>" sortable="custom">
+        <template slot-scope="scope">
+          <el-tag v-for="tag in scope.row.<%= prop.name %>" :key="tag.id" size="mini" :style="{ margin: '4px'}" disable-transitions>{{tag}}</el-tag>
+        </template>
+      </el-table-column>
+      <%_ } else { _%>
+      <el-table-column width="120" prop="<%= prop.name %>" label="<%=prop.javadoc ? prop.javadoc : prop.name%>" <%-prop.type==='Date' ? ':formatter="formatterDate"': ''%> sortable="custom"></el-table-column>
+
+      <%_ } _%>
+    <%_ })_%>
       <el-table-column width="200" prop="createdAt" label="创建时间" :formatter="formatterDate" sortable="custom"></el-table-column>
       <el-table-column width="200" prop="updatedAt" label="更新时间" :formatter="formatterDate" sortable="custom"></el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
@@ -68,7 +89,7 @@ export default {
       if (sortType === 'descending') <%=entity.name%>Query.descending(sortBy);
       conditions.forEach(condition => <%=entity.name%>Query[condition.condition](condition.key, condition.value));
       const tableDataList = await <%=entity.name%>Query.find();
-      this.tableData = tableDataList.map(item => item.toJSON());
+      this.tableData = tableDataList.map(item => item.toFullJSON());
       this.total = await (new AV.Query('<%=entity.name%>').count());
     },
     handleSelectionChange(rows) {

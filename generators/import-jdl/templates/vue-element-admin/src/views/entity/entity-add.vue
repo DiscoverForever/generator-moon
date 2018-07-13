@@ -1,5 +1,5 @@
 <template>
-  <div class="<%=entity.name%>-add">
+  <div class="<%= _.kebabCase(entity.name) %>-add">
     <el-form ref="form" :model="formData" label-width="80px">
       <%_entity.body.forEach(prop => {_%>
       <%_var rules = prop.validations.map(validate => {
@@ -36,20 +36,48 @@
           <el-option
             v-for="item in <%=prop.name%>s"
             :key="item.id"
-            :label="item.get('objectId')"
-            :value="item.get('objectId')">
+            :label="item.objectId"
+            :value="item">
           </el-option>
         </el-select>
         <%_}_%>
         <%_ if (prop.type.includes('Blob')) { _%>
-        <el-upload
-          class="upload-demo"
-          drag
-          multiple>
-          <i class="el-icon-upload"></i>
-          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-          <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+        <!-- <el-upload action="" :http-request="(upload) => formData.logo = upload.file" :auto-upload="false" list-type="picture-card" :on-preview="handle<%=prop.name%>PictureCardPreview" :on-remove="handle<%=prop.name%>Remove">
+          <i class="el-icon-plus"></i>
         </el-upload>
+        <el-dialog :visible.sync="<%=prop.name%>dialogVisible">
+          <img width="100%" :src="<%=prop.name%>dialogImageUrl" alt="">
+        </el-dialog> -->
+        <%_ } _%>
+        <%_ if (prop.type === 'ImageBlob') { _%>
+        <el-upload action=""  :auto-upload="false" :on-change="(file, fileList) => formData.<%= prop.name %> = file" :show-file-list="false" list-type="picture-card" :limit="1" accept="image/*">
+          <img v-if="formData.<%= prop.name %> && formData.<%= prop.name %>.url" :src="formData.<%= prop.name %>.url" width="145px">
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
+        <%_ } _%>
+        <%_ if (prop.type === 'TextBlob') { _%>
+        <el-upload action=""  :auto-upload="false" :on-change="(file, fileList) => formData.<%= prop.name %> = fileList[0]" list-type="text" :limit="1" accept="text/*">
+          <i class="el-icon-plus"></i>
+        </el-upload>
+        <%_ } _%>
+        <%_ if (prop.type === 'AnyBlob') { _%>
+        <el-upload action=""  :auto-upload="false" :on-change="(file, fileList) => formData.<%= prop.name %> = fileList[0]">
+          <i class="el-icon-plus"></i>
+        </el-upload>
+        <%_ } _%>
+        <%_ if (prop.type === 'ArrayString') { _%>
+        <el-select
+          v-model="formData.<%= prop.name %>"
+          multiple
+          filterable
+          remote
+          reserve-keyword
+          allow-create
+          no-data-text=""
+          default-first-option
+          placeholder="请输入关键词">
+    
+        </el-select>
         <%_ } _%>
         <%_if (enums.find(enumItem => enumItem.name === prop.type)) {_%>
         <el-select v-model="formData.<%=prop.name%>" placeholder="请选择">
@@ -72,7 +100,7 @@
 <script>
 import AV from 'leancloud-storage';
 export default {
-  name: '<%=entity.name%>-add',
+  name: '<%= _.kebabCase(entity.name) %>-add',
   data() {
     return {
       formData: {
@@ -83,6 +111,11 @@ export default {
       <%_entity.body.filter(prop => prop.type.startsWith('Pointer_')).forEach(prop => {_%>
       <%=prop.name%>s: [],
       <%_})_%>
+      <%_entity.body.filter(prop => prop.type.includes('Blob')).forEach(prop => {_%>
+      <%=prop.name%>dialogImageUrl: '',
+      <%=prop.name%>dialogVisible: false
+      <%_})_%>
+      
     }
   },
   methods: {
@@ -92,8 +125,8 @@ export default {
           try {
             const <%=entity.name.toLowerCase()%> = new AV.Object('<%=entity.name%>')
         <%_entity.body.forEach(prop => {_%>
-          <%_ if (prop.type.startsWith('Pointer_')) { _%>
-            <%=entity.name.toLowerCase()%>.set('<%=prop.name%>',  AV.Object.createWithoutData('<%= prop.type.replace(/^Pointer_/g, '') %>', this.formData.<%= prop.name %>))
+          <%_ if (prop.type.includes('Blob')){ _%>
+            if (this.formData.<%=prop.name%>.raw) <%=entity.name.toLowerCase()%>.set('<%=prop.name%>', new AV.File(this.formData.<%=prop.name%>.name, this.formData.<%=prop.name%>.raw))
           <%_ } else { _%>
             <%=entity.name.toLowerCase()%>.set('<%=prop.name%>', <%= prop.type === 'Date' ? `new Date(this.formData.${prop.name})` : `this.formData.${prop.name}`%>)
           <%_ } _%>
@@ -114,10 +147,21 @@ export default {
     remotePointerQuery(entityName, pointers) {
       const fn = async (query) => {
         const entityQuery = new AV.Query(entityName);
-        this[pointers] = await entityQuery.find();
+        const pointerList = await entityQuery.find()
+        this[pointers] = pointerList.map(pointer => pointer.toFullJSON());
       }
       return fn;
+    },
+  <%_entity.body.filter(prop => prop.type.includes('Blob')).forEach(prop => {_%>
+    handle<%=prop.name%>Remove(file, fileList) {
+      console.log(file, fileList);
+    },
+    handle<%=prop.name%>PictureCardPreview(file) {
+      this.<%=prop.name%>dialogImageUrl = file.url;
+      this.<%=prop.name%>dialogVisible = true;
     }
+  <%_})_%>
+    
   }
 }
 </script>

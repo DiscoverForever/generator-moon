@@ -25,14 +25,61 @@
           <el-option label="否" value="false"></el-option>
         </el-select>
         <%_}_%>
-        <%_if (prop.type.startsWith('Pointer')) {_%>
-        <el-select v-model="formData.<%=prop.name%>" placeholder="请选择">
-          <el-option :label="JSON.stringify(pointer)" :value="pointer.objectId" :key="pointer.id" v-for="pointer in pointers.find(pointer => pointer.className === '<%=prop.type.split('Pointer_')[1]%>').data"></el-option>
+        <%_if (prop.type.startsWith('Pointer_')) {_%>
+        <el-select
+          v-model="formData.<%=prop.name%>"
+          value-key="objectId"
+          filterable
+          remote
+          reserve-keyword
+          placeholder="请输入关键词"
+          :remote-method="remotePointerQuery('<%= prop.type.replace(/^Pointer_/g, '') %>', '<%=prop.name%>s')">
+          <el-option
+            v-for="item in <%=prop.name%>s"
+            :key="item.id"
+            :label="item.objectId"
+            :value="item">
+          </el-option>
         </el-select>
-        <%_ if (prop.type.startsWith('Pointer')) {_%>
-        <el-button @click="$router.push({path: '/entities/<%=prop.type.split('Pointer_')[1]%>/<%=prop.type.split('Pointer_')[1]%>-add.g.vue'})">创建<%=prop.javadoc%></el-button>
         <%_}_%>
-        <%_}_%>
+        <%_ if (prop.type.includes('Blob')) { _%>
+        <!-- <el-upload action="" :http-request="(upload) => formData.logo = upload.file" :auto-upload="false" list-type="picture-card" :on-preview="handle<%=prop.name%>PictureCardPreview" :on-remove="handle<%=prop.name%>Remove">
+          <i class="el-icon-plus"></i>
+        </el-upload>
+        <el-dialog :visible.sync="<%=prop.name%>dialogVisible">
+          <img width="100%" :src="<%=prop.name%>dialogImageUrl" alt="">
+        </el-dialog> -->
+        <%_ } _%>
+        <%_ if (prop.type === 'ImageBlob') { _%>
+        <el-upload action=""  :auto-upload="false" :on-change="(file, fileList) => formData.<%= prop.name %> = file" :show-file-list="false" list-type="picture-card" :limit="1" accept="image/*">
+          <img v-if="formData.<%= prop.name %> && formData.<%= prop.name %>.url" :src="formData.<%= prop.name %>.url" width="145px">
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
+        <%_ } _%>
+        <%_ if (prop.type === 'TextBlob') { _%>
+        <el-upload action=""  :auto-upload="false" :on-change="(file, fileList) => formData.<%= prop.name %> = fileList[0]" list-type="text" :limit="1" accept="text/*">
+          <i class="el-icon-plus"></i>
+        </el-upload>
+        <%_ } _%>
+        <%_ if (prop.type === 'AnyBlob') { _%>
+        <el-upload action=""  :auto-upload="false" :on-change="(file, fileList) => formData.<%= prop.name %> = fileList[0]">
+          <i class="el-icon-plus"></i>
+        </el-upload>
+        <%_ } _%>
+        <%_ if (prop.type === 'ArrayString') { _%>
+        <el-select
+          v-model="formData.<%= prop.name %>"
+          multiple
+          filterable
+          remote
+          reserve-keyword
+          allow-create
+          no-data-text=""
+          default-first-option
+          placeholder="请输入关键词">
+    
+        </el-select>
+        <%_ } _%>
         <%_if (enums.find(enumItem => enumItem.name === prop.type)) {_%>
         <el-select v-model="formData.<%=prop.name%>" placeholder="请选择">
           <%_enums.find(enumItem => enumItem.name === prop.type).values.forEach((enumVal, index) => {_%>
@@ -43,7 +90,7 @@
       </el-form-item>
       <%_})_%>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">保存修改</el-button>
+        <el-button type="primary" @click="onSubmit">保存</el-button>
         <!-- <el-button @click="onCancle">取消</el-button> -->
         <el-button @click="$refs.form.resetFields()">重置</el-button>
       </el-form-item>
@@ -58,22 +105,23 @@ export default {
   data() {
     return {
       formData: {
-        <%_entity.body.forEach(prop => {_%>
-        <%=prop.name%>: '',
-        <%_})_%>
+    <%_entity.body.forEach((prop, index) => {_%>
+      <%_ if (prop.type === 'ArrayString') {_%>
+        <%=prop.name%>: []<%= index === entity.body.length - 1 ? '' : ',' %>
+      <%_ } else { _%>
+        <%=prop.name%>: null<%= index === entity.body.length - 1 ? '' : ',' %>
+      <%_ } _%>
+    <%_})_%>
       },
-      pointers: [
-        <%_entity.body.forEach(prop => {_%>
-        <%_if (prop.type.startsWith('Pointer_')) {_%>
-        {
-          className: '<%=prop.type.split('Pointer_')[1]%>',
-          data: []
-        },
-        <%_}_%>
-        <%_})_%>
-        
-      ]
-    };
+    <%_entity.body.filter(prop => prop.type.startsWith('Pointer_')).forEach((prop, index) => {_%>
+      <%=prop.name%>s: [],
+    <%_})_%>
+    <%_entity.body.filter(prop => prop.type.includes('Blob')).forEach(prop => {_%>
+      <%=prop.name%>dialogImageUrl: '',
+      <%=prop.name%>dialogVisible: false
+    <%_})_%>
+      
+    }
   },
   props: {
     objectId: {
@@ -83,32 +131,35 @@ export default {
   },
   created() {
     this.init()
-    this.initPointerData()
   },
   methods: {
     async init() {
       const <%=entity.name.toLowerCase()%>Query = new AV.Query('<%=entity.name%>')
+      <%_entity.body.filter(prop => prop.type.startsWith('Pointer_')).forEach(prop => {_%>
+      <%=entity.name.toLowerCase()%>Query.include('<%=prop.name%>')
+      <%_})_%>
       const formData = await <%=entity.name.toLowerCase()%>Query.get(this.objectId)
-      this.formData = formData.toJSON()
+      this.formData = formData.toFullJSON()
+      <%_entity.body.filter(prop => prop.type.startsWith('Pointer_')).forEach(prop => {_%>
+      if (this.formData.<%= prop.name %>) this.<%= prop.name %>s.push(this.formData.<%= prop.name %>)
+      <%_})_%>
     },
     async onSubmit() {
       this.$refs.form.validate(async valid => {
         if (valid) {
           try {
             const <%=entity.name.toLowerCase()%> = AV.Object.createWithoutData('<%=entity.name%>', this.objectId)
-            <%_entity.body.forEach(prop => {_%>
-            <%_ if(prop.type.startsWith('Pointer_')) { _%>
-            <%=entity.name.toLowerCase()%>.set('<%=prop.name%>', AV.Object.createWithoutData('<%=prop.type.split('Pointer_')[1]%>', this.formData.<%=prop.name%>))
-            <%_} else if (prop.type === 'Date') {_%>
-            <%=entity.name.toLowerCase()%>.set('<%=prop.name%>', new Date(this.formData.<%=prop.name%>))
-            <%_} else {_%>
-            <%=entity.name.toLowerCase()%>.set('<%=prop.name%>', this.formData.<%=prop.name%>)
-            <%_}_%>
-            <%_})_%>
+        <%_entity.body.forEach(prop => {_%>
+          <%_ if (prop.type.includes('Blob')){ _%>
+            if (this.formData.<%=prop.name%>.raw) <%=entity.name.toLowerCase()%>.set('<%=prop.name%>', new AV.File(this.formData.<%=prop.name%>.name, this.formData.<%=prop.name%>.raw))
+          <%_ } else { _%>
+            <%=entity.name.toLowerCase()%>.set('<%=prop.name%>', <%= prop.type === 'Date' ? `new Date(this.formData.${prop.name})` : `this.formData.${prop.name}`%>)
+          <%_ } _%>
+        <%_ }); _%>
             await <%=entity.name.toLowerCase()%>.save();
-            this.$message.success('修改成功');
+            this.$message.success('创建成功');
           } catch (error) {
-            this.$message.error(`修改失败,${error.code}:${error.message}`);
+            this.$message.error(`创建失败,${error.code}:${error.message}`);
           }
         } else {
           this.$message.warning('请将表单填写完整');
@@ -118,13 +169,24 @@ export default {
     onCancle() {
       this.$router.go(-1);
     },
-    async initPointerData() {
-      this.pointers.forEach(async pointer => {
-        const query = new AV.Query(pointer.className);
-        const res = await query.find();
-        pointer.data = res.map(item => item.toJSON())
-      });
+    remotePointerQuery(entityName, pointers) {
+      const fn = async (query) => {
+        const entityQuery = new AV.Query(entityName);
+        const pointerList = await entityQuery.find()
+        this[pointers] = pointerList.map(pointer => pointer.toFullJSON());
+      }
+      return fn;
+    },
+  <%_entity.body.filter(prop => prop.type.includes('Blob')).forEach(prop => {_%>
+    handle<%=prop.name%>Remove(file, fileList) {
+      console.log(file, fileList);
+    },
+    handle<%=prop.name%>PictureCardPreview(file) {
+      this.<%=prop.name%>dialogImageUrl = file.url;
+      this.<%=prop.name%>dialogVisible = true;
     }
+  <%_})_%>
+    
   }
 }
 </script>
