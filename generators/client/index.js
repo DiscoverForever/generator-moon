@@ -25,6 +25,37 @@ module.exports = class extends Generator {
         message: '请选择您要使用的项目模版',
         choices: ['vue-element-admin'],
         default: 'vue-element-admin'
+      },
+      {
+        type: 'list',
+        name: 'dbType',
+        message: '请选择您要使用的数据库',
+        choices: ['leancloud'],
+        default: 'leancloud'
+      },
+      {
+        type: 'input',
+        name: 'leancloudAppId',
+        message: '请输入Leancloud AppId?(用于初始化SDK)',
+        default: this.config.get('leancloudAppId'),
+        when: input => input.dbType === 'leancloud',
+        validate: input => (/^[a-zA-Z0-9_-]{1,}$/.test(input) ? true : '格式错误')
+      },
+      {
+        type: 'input',
+        name: 'leancloudAppKey',
+        message: '请输入Leancloud AppKey?((用于初始化SDK))',
+        default: this.config.get('leancloudAppKey'),
+        when: input => input.dbType === 'leancloud',
+        validate: input => (/^[a-zA-Z0-9_-]{1,}$/.test(input) ? true : '格式错误')
+      },
+      {
+        type: 'input',
+        name: 'leancloudMasterKey',
+        message: '请输入Leancloud MasterKey?((用于初始化SDK))',
+        default: this.config.get('leancloudMasterKey'),
+        when: input => input.dbType === 'leancloud',
+        validate: input => (/^[a-zA-Z0-9_-]{1,}$/.test(input) ? true : '格式错误')
       }
     ];
 
