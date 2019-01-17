@@ -1,7 +1,7 @@
 'use strict';
 const Generator = require('yeoman-generator');
 const xml2js = require('xml2js');
-const _ = require('loadsh');
+const _ = require('lodash');
 const merge = require('deepmerge');
 module.exports = class extends Generator {
   constructor(args, opts) {

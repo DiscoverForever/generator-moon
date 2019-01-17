@@ -1,7 +1,7 @@
 'use strict';
 const Generator = require('yeoman-generator');
 const jhiCore = require('jhipster-core');
-const _ = require('loadsh');
+const _ = require('lodash');
 const merge = require('deepmerge');
 const querystring = require('querystring');
 
